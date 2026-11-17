@@ -68,44 +68,41 @@ The raw dataset is not redistributed in this repository. Users must obtain it fr
 
 ### 3.1 Preprocessing and Windowing
 
-Each recording is divided into non-overlapping windows of four seconds.
+Each EEG recording is divided into non-overlapping windows of 4 seconds.
 
-At a sampling frequency of 128 Hz, each window contains:
+Since the sampling frequency is 128 Hz, each window contains:
 
-\[
-4 \times 128 = 512 \text{ samples}
-\]
+**4 seconds × 128 samples/second = 512 samples**
 
-The mean of each EEG channel is removed within each window before feature extraction.
+The mean of each EEG channel is removed separately within each window before feature extraction.
 
-This produces 37 complete windows from each 150-second recording.
+From each 150-second recording, 37 complete windows are obtained. The remaining 2 seconds are discarded because they do not form a complete 4-second window.
 
-Across 48 participants and two conditions, the resulting dataset contains:
+Across 48 participants and two recording conditions (resting and multitasking), the total number of windows is:
 
-\[
-48 \times 2 \times 37 = 3552 \text{ windows}
-\]
+**48 participants × 2 conditions × 37 windows = 3,552 windows**
 
 ### 3.2 Feature Extraction
 
+
 Welch's method is used to estimate the power spectral density (PSD) of each EEG window.
 
-Power is integrated over four frequency bands:
+The estimated power is integrated over four frequency bands:
 
-| Frequency band | Range |
+| Frequency Band | Frequency Range |
 |---|---|
 | Delta | 1–4 Hz |
 | Theta | 4–8 Hz |
 | Alpha | 8–13 Hz |
 | Beta | 13–30 Hz |
 
-The extracted band-power values are log-transformed using a base-10 logarithm.
+The extracted band-power values are then transformed using a base-10 logarithm to obtain the final feature representation.
 
-With 14 EEG channels and four frequency bands, each window produces:
+Since each window contains data from 14 EEG channels and four frequency bands, the total number of features per window is:
 
-\[
-14 \times 4 = 56 \text{ features}
-\]
+**14 channels × 4 frequency bands = 56 features**
+
+Therefore, each four-second EEG window is represented by a 56-dimensional feature vector.
 
 No explicit artifact-rejection procedure is applied in this analysis.
 
@@ -130,17 +127,16 @@ A logistic regression classifier using eight predefined features:
 
 The eight-feature model is included as a comparison of a smaller, specified feature set against the full representation. It should not be interpreted as a validated biomarker or an independently established optimal feature set.
 
-Both logistic regression models use:
+Both logistic regression models use the following configuration:
 
-- StandardScaler for feature standardization
-- LogisticRegression with balanced class weights
-- Regularization parameter \(C\) selected from:
+- **Feature scaling:** `StandardScaler`
+- **Classifier:** `LogisticRegression`
+- **Class balancing:** `class_weight="balanced"`
+- **Regularization parameter:** `C`, selected from the values `0.01`, `0.1`, `1`, and `10`.
 
-\[
-C \in \{0.01, 0.1, 1, 10\}
-\]
+The regularization parameter is selected using five-fold StratifiedGroupKFold cross-validation on the training participants.
 
-Scaling is fitted using training data within each cross-validation fold to avoid data leakage.
+Feature scaling is fitted separately within each training fold. This prevents information from the validation fold from influencing the scaling parameters and helps avoid data leakage.
 
 ---
 
