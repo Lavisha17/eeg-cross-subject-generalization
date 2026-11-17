@@ -231,15 +231,15 @@ The repository includes visualizations of the evaluation results.
 
 ### Confusion Matrix
 
-`figures/figure1_confusion_matrix.png`
+![Confusion Matrix](figures/figure1_confusion_matrix.png)
 
 ### Participant-Level Accuracy
 
-`figures/figure2_participant_accuracy.png`
+![Participant-Level Accuracy](figures/figure2_participant_accuracy.png)
 
 ### Model Comparison
 
-`figures/figure3_model_comparison.png`
+![Model Comparison](figures/figure3_model_comparison.png)
 
 These figures summarize classification errors, differences in participant-level performance, and the comparison between the evaluated models.
 
