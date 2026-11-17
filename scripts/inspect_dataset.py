@@ -1,16 +1,31 @@
-from pathlib import Path
+﻿from pathlib import Path
+import argparse
 import numpy as np
 
-DATA_DIR = Path(r"C:\Users\lavis\Downloads\STEW\STEW")
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="Validate the STEW EEG dataset."
+    )
+    parser.add_argument(
+        "--data-dir",
+        type=Path,
+        default=Path("data/STEW"),
+        help="Directory containing the STEW recordings."
+    )
+    args = parser.parse_args()
+
+    data_dir = args.data_dir
     total = 0
     problems = []
+
+    if not data_dir.exists():
+        raise SystemExit(f"Dataset directory not found: {data_dir}")
 
     for subject in range(1, 49):
         for condition in ["lo", "hi"]:
             filename = f"sub{subject:02d}_{condition}.txt"
-            filepath = DATA_DIR / filename
+            filepath = data_dir / filename
 
             if not filepath.exists():
                 problems.append(f"Missing: {filename}")
@@ -21,7 +36,9 @@ def main():
                 total += 1
 
                 if eeg.shape != (19200, 14):
-                    problems.append(f"Unexpected shape: {filename}: {eeg.shape}")
+                    problems.append(
+                        f"Unexpected shape: {filename}: {eeg.shape}"
+                    )
 
                 if not np.isfinite(eeg).all():
                     problems.append(f"Non-finite values: {filename}")
@@ -37,6 +54,9 @@ def main():
 
     if total == 96 and not problems:
         print("DATASET VALIDATION PASSED")
+    else:
+        raise SystemExit("DATASET VALIDATION FAILED")
+
 
 if __name__ == "__main__":
     main()

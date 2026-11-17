@@ -1,9 +1,10 @@
-from pathlib import Path
+﻿from pathlib import Path
+import argparse
 import numpy as np
 import pandas as pd
 from scipy.signal import welch
 
-DATA_DIR = Path(r"C:\Users\lavis\Downloads\STEW\STEW")
+
 OUTPUT_FILE = Path("results/features.csv")
 
 CHANNELS = [
@@ -24,7 +25,6 @@ WINDOW_SAMPLES = FS * WINDOW_SECONDS
 
 
 def extract_window_features(window):
-    # Remove the mean independently from each channel.
     window = window - window.mean(axis=0, keepdims=True)
 
     frequencies, psd = welch(
@@ -32,7 +32,7 @@ def extract_window_features(window):
         fs=FS,
         nperseg=WINDOW_SAMPLES,
         detrend=False,
-	axis=0
+        axis=0
     )
 
     features = {}
@@ -40,19 +40,49 @@ def extract_window_features(window):
     for channel_index, channel in enumerate(CHANNELS):
         for band_name, (low, high) in BANDS.items():
             mask = (frequencies >= low) & (frequencies < high)
-            power = np.trapezoid(psd[mask, channel_index], frequencies[mask])
-            features[f"{channel}_{band_name}"] = np.log10(max(power, 1e-20))
+            power = np.trapezoid(
+                psd[mask, channel_index],
+                frequencies[mask]
+            )
+            features[f"{channel}_{band_name}"] = np.log10(
+                max(power, 1e-20)
+            )
 
     return features
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="Extract band-power features from STEW EEG recordings."
+    )
+    parser.add_argument(
+        "--data-dir",
+        type=Path,
+        default=Path("data/STEW"),
+        help="Directory containing the STEW recordings."
+    )
+    args = parser.parse_args()
+
+    data_dir = args.data_dir
+
+    if not data_dir.exists():
+        raise SystemExit(f"Dataset directory not found: {data_dir}")
+
     rows = []
 
     for subject in range(1, 49):
         for condition in ["lo", "hi"]:
-            filepath = DATA_DIR / f"sub{subject:02d}_{condition}.txt"
+            filepath = data_dir / f"sub{subject:02d}_{condition}.txt"
+
+            if not filepath.exists():
+                raise SystemExit(f"Missing recording: {filepath}")
+
             eeg = np.loadtxt(filepath)
+
+            if eeg.shape != (19200, 14):
+                raise SystemExit(
+                    f"Unexpected shape in {filepath}: {eeg.shape}"
+                )
 
             label = 0 if condition == "lo" else 1
 
