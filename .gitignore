@@ -1,0 +1,24 @@
+
+.venv/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Raw data
+data/
+
+# Generated results: ignore by default
+results/*
+!results/model_results.csv
+!results/participant_results.csv
+!results/participant_summary.csv
+
+# Generated figures: ignore by default
+figures/*
+!figures/figure1_confusion_matrix.png
+!figures/figure2_participant_accuracy.png
+!figures/figure3_model_comparison.png
+
+# Python environment files
+.env
+.env.*
