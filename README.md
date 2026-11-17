@@ -5,7 +5,7 @@
 **ES 678 — M.Tech Research Project**  
 **Indian Institute of Technology Gandhinagar**
 
-**Author:** Lavisha Ulkesh Desai
+**Author:** Lavisha Ulkesh Desai<br>
 **Roll Number:** 26250021  
 **Year:** 2026
 
